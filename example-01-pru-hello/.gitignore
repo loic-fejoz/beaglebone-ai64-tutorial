@@ -1,0 +1,4 @@
+main-pru
+*.o
+pru9-hello
+pru9-hellobis

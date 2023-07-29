@@ -10,6 +10,7 @@ especially with DSP target in mind.
 ## Inspiration
 
 * https://www.glennklockwood.com/embedded/
+* https://markayoder.github.io/PRUCookbook/
 * https://github.com/RoSchmi/Beaglebone-PRU-RPMsg-HelloWorld
 * https://solidmodeling.calliope.us/index.php/2016/09/11/beaglebone-remoteproc-hello-world/
 * https://github.com/PierrickRauby/PRU-RPMsg-Setup-BeagleBoneBlack/blob/master/PRU%20Rpmsg%20documentation.pdf

@@ -75,7 +75,7 @@ error: no input section is linked in
 warning: no suitable entry-point found; setting to 0
 ```
 
-A specifity is that you need to also provide a [command script file for the linker](./J721E_PRU9.cmd) so that it knows how to map things. For now, you can take inspiration from [/usr/lib/ti/pru-software-support-package/examples/j721e/PRU_Halt/J721E_PRU1.cmd](file://usr/lib/ti/pru-software-support-package/examples/j721e/PRU_Halt/J721E_PRU1.cmd).
+A specifity is that you need to also provide a [command script file for the linker](./J721E_PRU9.cmd) so that it knows how to map things. For now, you can take inspiration from [/usr/lib/ti/pru-software-support-package/examples/j721e/PRU_Halt/J721E_PRU1.cmd](file://usr/lib/ti/pru-software-support-package/examples/j721e/PRU_Halt/J721E_PRU1.cmd). More details can be found in the [PRUCookbook](https://markayoder.github.io/PRUCookbook/03details/details.html#detail_linker).
 
 Have a look at the [Makefile](./Makefile) to have a look at the detailled commands.
 
@@ -114,4 +114,9 @@ echo: write error: Invalid argument
 [ 9678.474502] remoteproc remoteproc9: bad phdr da 0x0 mem 0x5800
 [ 9678.480371] remoteproc remoteproc9: Failed to load program segments: -22
 [ 9678.487104] remoteproc remoteproc9: Boot failed: -22
+```
+
+```
+sudo sh -c "echo 'start' > /sys/class/remoteproc/remoteproc9/state"
+sh: 1: echo: echo: I/O error
 ```
