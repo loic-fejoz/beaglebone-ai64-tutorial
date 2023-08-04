@@ -84,7 +84,7 @@ NB: The following command line easy this testing:
 make debug-pru9
 ```
 
-:partying_face: Congratulation! Time to move to [next step](../example-02/).
+:partying_face: Congratulation! Time to move to [next step](../example-02-c6x-dsp/).
 
 ## References
 

@@ -9,7 +9,7 @@ LDFLAGS = J721E_PRU9.cmd
 
 all: main-pru
 
-main-pru.o: main-pru.c
+main-pru.o: main-pru.c J721E_PRU9.cmd
 	$(CC) $(CFLAGS) $^ --output_file $@
 
 $(PRU_FW): main-pru.o J721E_PRU9.cmd
