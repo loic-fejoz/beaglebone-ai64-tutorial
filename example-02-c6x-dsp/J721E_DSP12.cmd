@@ -75,17 +75,17 @@ MEMORY
     /* L2 for C66x_1 [ size 224.00 KB ] */
     L2RAM_C66x_1             ( RWIX ) : ORIGIN = 0x00800000 , LENGTH = 0x00038000
     /* DDR for C66x_1 for Linux resource table [ size 1024 B ] */
-    DDR_C66x_1_RESOURCE_TABLE ( RWIX ) : ORIGIN = 0xA8100000 , LENGTH = 0x00000400
+    DDR_C66x_1_RESOURCE_TABLE ( RWIX ) : ORIGIN = 0xA6100000 , LENGTH = 0x00000400
     /* DDR for C66x_1 for boot section [ size 1024 B ] */
     DDR_C66x_1_BOOT          ( RWIX ) : ORIGIN = 0xA8200000 , LENGTH = 0x00000400
     /* DDR for C66x_1 for code/data [ size 14.00 MB ] */
-    DDR_C66x_1               ( RWIX ) : ORIGIN = 0xA8200400 , LENGTH = 0x00DFFC00
+    DDR_C66x_1               ( RWIX ) : ORIGIN = 0xA6200400 , LENGTH = 0x00DFFC00
     /* DDR for C66x_1 for Linux IPC [ size 1024.00 KB ] */
     DDR_C66x_1_IPC           ( RWIX ) : ORIGIN = 0xA9000000 , LENGTH = 0x00100000
     /* Memory for IPC Vring's. MUST be non-cached or cache-coherent [ size 32.00 MB ] */
-    IPC_VRING_MEM                     : ORIGIN = 0xAA000000 , LENGTH = 0x02000000
+    /*IPC_VRING_MEM                     : ORIGIN = 0xAA000000 , LENGTH = 0x01000000*/
     /* Memory for remote core logging [ size 256.00 KB ] */
-    APP_LOG_MEM                       : ORIGIN = 0xAC000000 , LENGTH = 0x00040000
+    APP_LOG_MEM                       : ORIGIN = 0xAA000000 , LENGTH = 0x00040000
     /* Memory for TI OpenVX shared memory. MUST be non-cached or cache-coherent [ size 63.75 MB ] */
     TIOVX_OBJ_DESC_MEM                : ORIGIN = 0xAC040000 , LENGTH = 0x03FC0000
     /* Memory for remote core file operations [ size  4.00 MB ] */
@@ -142,10 +142,10 @@ SECTIONS
         *(.resource_table)
     }  >  DDR_C66x_1_RESOURCE_TABLE
 
-    .log_shared_mem :
+    /*.log_shared_mem :
 	{
 		*(.log_shared_mem*)
-	} > APP_LOG_MEM
+	} > APP_LOG_MEM*/
 
     .tracebuf : {} align(1024)   > DDR_C66x_1
 
@@ -155,7 +155,7 @@ SECTIONS
     .bss:app_log_mem        (NOLOAD) : {} > APP_LOG_MEM
     .bss:app_fileio_mem     (NOLOAD) : {} > APP_FILEIO_MEM
     .bss:tiovx_obj_desc_mem (NOLOAD) : {} > TIOVX_OBJ_DESC_MEM
-    .bss:ipc_vring_mem      (NOLOAD) : {} > IPC_VRING_MEM
+    /*.bss:ipc_vring_mem      (NOLOAD) : {} > IPC_VRING_MEM*/
 
     .bss:l2mem              (NOLOAD)(NOINIT) : {} > L2RAM_C66x_1
 }
