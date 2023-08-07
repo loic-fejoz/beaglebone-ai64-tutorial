@@ -3,39 +3,42 @@
 
 #include <stddef.h>
 
-// #define DebugP_MEM_LOG_SIZE 1024
-// __attribute__((section (".log_shared_mem"))) char gDebugMemLog[DebugP_MEM_LOG_SIZE];
+#include <rsc_types.h>
 
-// struct my_resource_table {
-// 	struct resource_table base;
+#define DebugP_MEM_LOG_SIZE 1024
+__attribute__((section (".log_shared_mem"))) char gDebugMemLog[DebugP_MEM_LOG_SIZE];
 
-// 	uint32_t offset[1]; /* Should match 'num' in actual definition */
+struct my_resource_table {
+	struct resource_table base;
 
-//     struct fw_rsc_trace trace;
-// };
+	uint32_t offset[1]; /* Should match 'num' in actual definition */
 
-// #pragma DATA_SECTION(pru_remoteproc_ResourceTable, ".resource_table")
-// #pragma RETAIN(pru_remoteproc_ResourceTable)
-// struct my_resource_table pru_remoteproc_ResourceTable = {
-//     {
-//         1,	/* we're the first version that implements this */
-//         1,	/* number of entries in the table */
-//         { 0U, 0U, } /* reserved, must be zero */
-//     },
-//     /* offsets to the entries */
-//     {
-//         offsetof(struct my_resource_table, trace),
-//     },
-//     {
-//         (TYPE_TRACE),
-//         (uint32_t)gDebugMemLog, DebugP_MEM_LOG_SIZE,
-//         0, "trace:r5fss1_1",
-//     },
-// };
+    struct fw_rsc_trace trace;
+};
+
+#pragma DATA_SECTION(dsp_remoteproc_ResourceTable, ".resource_table")
+#pragma RETAIN(dsp_remoteproc_ResourceTable)
+static const struct my_resource_table dsp_remoteproc_ResourceTable = {
+    {
+        1,	/* we're the first version that implements this */
+        1,	/* number of entries in the table */
+        { 0U, 0U, } /* reserved, must be zero */
+    },
+    /* offsets to the entries */
+    {
+        offsetof(struct my_resource_table, trace),
+    },
+    {
+        (TYPE_TRACE),
+        (uint32_t)gDebugMemLog, DebugP_MEM_LOG_SIZE,
+        0, "trace:c66x_1",
+    },
+};
 
 int main(void) {
-    // strcpy(gDebugMemLog, "Hello world, I am PRU!\n");
+    strcpy(gDebugMemLog, "Hello world, I am c66_x!\n");
     while (1) {
         
     }
+    return 0;
 }
