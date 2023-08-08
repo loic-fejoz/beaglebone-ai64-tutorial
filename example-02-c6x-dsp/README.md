@@ -6,6 +6,15 @@ Goal is to prepare an empty firmware for C66x_1, aka remoteproc12.
 make debug-dsp12
 ```
 
+Same as for PRU, we need to map the resource table into its own memory section for remoteproc to be able to retrieve it.
+Also, and contrary to PRU compiler, it is important for it to be declared `static const`.
+
+```c
+#pragma DATA_SECTION(dsp_remoteproc_ResourceTable, ".resource_table")
+#pragma RETAIN(dsp_remoteproc_ResourceTable)
+static const struct my_resource_table dsp_remoteproc_ResourceTable
+```
+
 
 ```sh
 $ readelf -x .resource_table /lib/firmware/j7-c66_1-fw.tisdk 
