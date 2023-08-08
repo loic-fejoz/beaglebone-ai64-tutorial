@@ -1,0 +1,69 @@
+%YAML 1.1
+---
+defaults:
+  # Layout options
+  unit_size: 0x4000
+  unit_height: 0.325
+  min_height: 0.675
+  max_height: 1
+  discontinuity_height: 0.625
+  region_width: 1.5
+
+  # Presentation options
+  background: "#fff"
+  fill: '#C7E3EC'
+  outline: '#336DA5'
+
+  # Address labels
+  address_format: c
+  size_format: si
+
+layout:
+    0x00800000:
+        size: 0x00038000
+        label: "L2RAM\nC66x_1"
+    0xA6100000:
+        size: 0x00000400
+        label: "DDR C66x_1\nRESOURCE TABLE"
+    0xA8200000:
+        size: 0x00000400
+        label: "DDR C66x_1\nBOOT"
+    0xA6200400:
+        size: 0x00DFFC00
+        label: "DDR C66x_1"
+    0xA9000000:
+        size: 0x00100000
+        label: "DDR C66x_1\nIPC"
+    0xAA000000:
+        size: 0x01000000
+        label: "IPC VRING\nMEM"
+    0xAA000000:
+        size: 0x00040000
+        label: "APP LOG\nMEM"
+    0xAC040000:
+        size: 0x03FC0000
+        label: "TIOVX\nOBJ DESC\nMEM"
+    0xB0000000:
+        size: 0x00400000
+        label: "APP\nFILEIO MEM"
+    0xB8000000:
+        size: 0x20000000
+        label: "DDR\nSHARED MEM"
+    0xDC000000:
+        size: 0x01000000
+        label: "DDR\nC66X_1\nLOCAL HEAP"
+    0xDD000000:
+        size: 0x03000000
+        label: "DDR\nC66X_1\nSCRATCH"
+
+automatic:
+  discontinuities:
+    fill: "#fff"
+    style: cut-out
+  addresses:
+    side: right
+    start: true
+    end: false
+    size: true
+    final_end: true
+    end_exclusive: false

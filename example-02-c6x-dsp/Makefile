@@ -10,7 +10,7 @@ CFLAGS = --include_path=$(DSP_SWPKG)/include --include_path=$(DSP_SWPKG)/lib --i
 
 LDFLAGS = -c --search_path=$(DSP_SWPKG)/lib 
 
-all: $(DSP_FW)
+all: $(DSP_FW) J721E_DSP12.svg C66SS.svg
 
 main-dsp.o: main-dsp.c
 	$(CC) $(CFLAGS) $^ --output_file $@
@@ -29,6 +29,9 @@ run-dsp12: /lib/firmware/$(DSP_FW)
 debug-dsp12: run-dsp12
 	dmesg | tail -n 5
 	sudo tail /sys/kernel/debug/remoteproc/remoteproc12/trace0
+
+%.svg: %.mld
+	mld $<
 
 .PHONY: run-dsp12 debug-dsp12 clean
 

@@ -39,53 +39,33 @@ sudo sh -c "echo 'stop' > /sys/class/remoteproc/remoteproc12/state" ; \
 sudo sh -c "echo 'dsp12-hello' > /sys/class/remoteproc/remoteproc12/firmware" && \
 sudo sh -c "echo 'start' > /sys/class/remoteproc/remoteproc12/state"; /bin/true
 dmesg | tail -n 5
+```
+```log
 [48131.653976] remoteproc remoteproc12: stopped remote processor 4d80800000.dsp
 [48131.694744] remoteproc remoteproc12: powering up 4d80800000.dsp
 [48131.701136] remoteproc remoteproc12: Booting fw image dsp12-hello, size 62332
 [48131.709054] k3-dsp-rproc 4d80800000.dsp: booting DSP core using boot addr = 0xa6201000
 [48131.717264] remoteproc remoteproc12: remote processor 4d80800000.dsp is now up
+```
+```sh
 sudo tail /sys/kernel/debug/remoteproc/remoteproc12/trace0
 Hello world, I am c66_x!
 ```
 
-All the trick is to get the proper [linker map file](./J721E_DSP12.cmd). But how to find this information for my actual configuration?
+From the processors view memory map section of the [J721E DRA829/TDA4VM Processors Technical Reference Manual](https://www.ti.com/lit/zip/spruil1), the C66SS0/1 memory map looks like:
 
-## Appendix
+![](C66SS.svg)
 
-Maybe usefull? How Code Composer Studio (CCS): create a simple firmware:
+RAT means Region-based Address translation. It translates 32-bit input address into a 48-bit address.
 
-```
- Invoking: C6000 Compiler
- "C:/ti/ccs1240/ccs/tools/compiler/ti-cgt-c6000_8.3.12/bin/cl6x"
-	--include_path="C:/Users/loic/workspace_v12/test-dsp-from-ccs"
-	--include_path="C:/ti/ccs1240/ccs/tools/compiler/ti-cgt-c6000_8.3.12/include"
-	-g
-	--diag_warning=225
-	--diag_wrap=off
-	--display_error_number
-	--preproc_with_compile
-	--preproc_dependency="main.d_raw"
-	"../main.c"
- Finished building: "../main.c"
+All the trick is to get the proper [linker map file](./J721E_DSP12.cmd) as displayed after. So basically, we put everything into the `C66_COREPAC_RAT_REGION` (except for the `L2_RAM` that is not used in this example). Probably not optimal for stack and heap but at least it works!
 
- Building target: "test-dsp-from-ccs.out"
- Invoking: C6000 Linker
- "C:/ti/ccs1240/ccs/tools/compiler/ti-cgt-c6000_8.3.12/bin/cl6x"
-	-g
-	--diag_warning=225
-	--diag_wrap=off
-	--display_error_number
-	-z
-	-m"test-dsp-from-ccs.map"
-	-i"C:/ti/ccs1240/ccs/tools/compiler/ti-cgt-c6000_8.3.12/lib"
-	-i"C:/ti/ccs1240/ccs/tools/compiler/ti-cgt-c6000_8.3.12/include"
-	--reread_libs
-	--diag_wrap=off
-	--display_error_number
-	--warn_sections
-	--xml_link_info="test-dsp-from-ccs_linkInfo.xml"
-	--rom_model
-	-o "test-dsp-from-ccs.out"
-	"./main.obj"
-	-llibc.a 
+![](./J721E_DSP12.svg)
+
+How to find this information for my actual configuration?
+For instance, choosing another region for the resource table result in having a `bad phdr da`.
+
+```log
+[ 4213.145043] remoteproc remoteproc12: bad phdr da 0xa7100000 mem 0x44
+[ 4213.151450] remoteproc remoteproc12: Failed to load program segments: -22
 ```

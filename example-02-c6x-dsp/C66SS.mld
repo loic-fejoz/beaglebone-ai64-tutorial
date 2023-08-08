@@ -1,0 +1,60 @@
+%YAML 1.1
+---
+defaults:
+  # Layout options
+  unit_size: 0x4000
+  unit_height: 0.325
+  min_height: 0.675
+  max_height: 1
+  discontinuity_height: 0.625
+  region_width: 1.5
+
+  # Presentation options
+  background: "#fff"
+  fill: '#C7E3EC'
+  outline: '#336DA5'
+
+  # Address labels
+  address_format: c
+  size_format: si
+
+layout:
+    0x00800000:
+        size: 0x00048000
+        label: "C66 COREPAC\nL2"
+    0x00E00000:
+        size: 0x00008000
+        label: "C66 COREPAC\nL1P"
+    0x00F00000:
+        size: 0x00008000
+        label: "C66 COREPAC\nL1D"
+    0x01000000:
+        size: 0x00C00000
+        label: "C66 COREPAC\nICFG"
+    0x01C00000:
+        size: 0xA00000
+        label: "C66 COREPAC\nEXTERNAL CFG"
+    0x07FF0000:
+        size: 0x00010000
+        label: "C66 COREPAC\nC66 RATCFG"
+    0x08000000:
+        size: 0x00010000
+        label: "C66 COREPAC\nXMC MMR"
+    0x08010000:
+        size: 0x00010000
+        label: "C66 COREPAC\nXMC EDI"
+    0x20000000:
+        size: 0xE0000000
+        label: "C66 COREPAC\nRAT REGION"
+
+automatic:
+  discontinuities:
+    fill: "#fff"
+    style: cut-out
+  addresses:
+    side: right
+    start: true
+    end: false
+    size: true
+    final_end: true
+    end_exclusive: true
