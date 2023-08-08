@@ -15,21 +15,42 @@ Also, and contrary to PRU compiler, it is important for it to be declared `stati
 static const struct my_resource_table dsp_remoteproc_ResourceTable
 ```
 
-
 ```sh
-$ readelf -x .resource_table /lib/firmware/j7-c66_1-fw.tisdk 
+$ readelf -x .resource_table /lib/firmware/dsp12-hello 
 
 Hex dump of section '.resource_table':
-  0xa7100000 01000000 02000000 00000000 00000000 ................
-  0xa7100010 18000000 5c000000 03000000 07000000 ....\...........
-  0xa7100020 00000000 01000000 00000000 00000000 ................
-  0xa7100030 00020000 ffffffff 00100000 00010000 ................
-  0xa7100040 01000000 00000000 ffffffff 00100000 ................
-  0xa7100050 00010000 02000000 00000000 02000000 ................
-  0xa7100060 002058a7 00000800 00000000 74726163 . X.........trac
-  0xa7100070 653a7235 66300000 00000000 00000000 e:r5f0..........
-  0xa7100080 00000000 00000000 00000000          ............
+  0xa6100000 01000000 01000000 00000000 00000000 ................
+  0xa6100010 14000000 02000000 00008000 00040000 ................
+  0xa6100020 00000000 74726163 653a6336 36785f31 ....trace:c66x_1
+  0xa6100030 00000000 00000000 00000000 00000000 ................
+  0xa6100040 00000000
 ```
+
+And here we go!
+
+```sh
+$ make clean all debug-dsp12 
+rm -f dsp12-hello *.o *.obj
+cl6x --include_path=/usr/share/ti/cgt-c6x/include --include_path=/usr/share/ti/cgt-c6x/lib --include_path=/usr/lib/ti/pru-software-support-package/include main-dsp.c --output_file main-dsp.o
+"main-dsp.c", line 43: warning: statement is unreachable
+lnk6x -c --search_path=/usr/share/ti/cgt-c6x/lib  main-dsp.o /usr/share/ti/cgt-c6x/lib/rts6600_elf.lib -o dsp12-hello -m debug-mem.txt J721E_DSP12.cmd
+sudo cp dsp12-hello /lib/firmware/dsp12-hello
+sudo sh -c "echo 'stop' > /sys/class/remoteproc/remoteproc12/state" ; \
+sudo sh -c "echo 'dsp12-hello' > /sys/class/remoteproc/remoteproc12/firmware" && \
+sudo sh -c "echo 'start' > /sys/class/remoteproc/remoteproc12/state"; /bin/true
+dmesg | tail -n 5
+[48131.653976] remoteproc remoteproc12: stopped remote processor 4d80800000.dsp
+[48131.694744] remoteproc remoteproc12: powering up 4d80800000.dsp
+[48131.701136] remoteproc remoteproc12: Booting fw image dsp12-hello, size 62332
+[48131.709054] k3-dsp-rproc 4d80800000.dsp: booting DSP core using boot addr = 0xa6201000
+[48131.717264] remoteproc remoteproc12: remote processor 4d80800000.dsp is now up
+sudo tail /sys/kernel/debug/remoteproc/remoteproc12/trace0
+Hello world, I am c66_x!
+```
+
+All the trick is to get the proper [linker map file](./J721E_DSP12.cmd). But how to find this information for my actual configuration?
+
+## Appendix
 
 Maybe usefull? How Code Composer Studio (CCS): create a simple firmware:
 
