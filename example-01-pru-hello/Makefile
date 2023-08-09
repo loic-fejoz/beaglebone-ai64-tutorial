@@ -9,11 +9,11 @@ LDFLAGS = J721E_PRU9.cmd
 
 all: main-pru
 
-main-pru.o: main-pru.c J721E_PRU9.cmd
+main-pru.o: main-pru.c
 	$(CC) $(CFLAGS) $^ --output_file $@
 
 $(PRU_FW): main-pru.o J721E_PRU9.cmd
-	$(LD) $(LDFLAGS) $< -o $@
+	$(LD) -o $@ $< $(LDFLAGS)
 
 /lib/firmware/$(PRU_FW): $(PRU_FW)
 	sudo cp $< $@

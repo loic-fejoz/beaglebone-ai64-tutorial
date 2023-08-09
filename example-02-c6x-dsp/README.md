@@ -62,10 +62,144 @@ All the trick is to get the proper [linker map file](./J721E_DSP12.cmd) as displ
 
 ![](./J721E_DSP12.svg)
 
-How to find this information for my actual configuration?
-For instance, choosing another region for the resource table result in having a `bad phdr da`.
+May you try choosing another region for the resource table result and you will received a `bad phdr da`.
 
 ```log
 [ 4213.145043] remoteproc remoteproc12: bad phdr da 0xa7100000 mem 0x44
 [ 4213.151450] remoteproc remoteproc12: Failed to load program segments: -22
 ```
+
+You need to adapt the memory mapping to your actual board configuration. The memory configuration you are looking for is simply in the device tree:
+
+```sh
+$ ls -1 -d /proc/device-tree/reserved-memory/c66*
+/proc/device-tree/reserved-memory/c66-dma-memory@a6000000
+/proc/device-tree/reserved-memory/c66-dma-memory@a7000000
+/proc/device-tree/reserved-memory/c66-memory@a6100000
+/proc/device-tree/reserved-memory/c66-memory@a7100000
+
+$ ls -1 -d /proc/device-tree/__symbols__/*c66*
+/proc/device-tree/__symbols__/c66_0
+/proc/device-tree/__symbols__/c66_0_dma_memory_region
+/proc/device-tree/__symbols__/c66_0_memory_region
+/proc/device-tree/__symbols__/c66_1
+/proc/device-tree/__symbols__/c66_1_dma_memory_region
+/proc/device-tree/__symbols__/c66_1_memory_region
+/proc/device-tree/__symbols__/mbox_c66_0
+/proc/device-tree/__symbols__/mbox_c66_1
+
+$ cat /proc/device-tree/__symbols__/c66_0_memory_region
+/reserved-memory/c66-memory@a6100000
+```
+
+or you can retrieve it also from your uboot configuration:
+
+```sh
+dtc -I dtb -O dts /boot/dtbs/`uname -r`/ti/k3-j721e-beagleboneai64.dtb > k3-j721e-beagleboneai64.dts
+```
+
+```
+		dsp@4d80800000 {
+			compatible = "ti,j721e-c66-dsp";
+			reg = <0x4d 0x80800000 0x00 0x48000 0x4d 0x80e00000 0x00 0x8000 0x4d 0x80f00000 0x00 0x8000>;
+			reg-names = "l2sram\0l1pram\0l1dram";
+			ti,sci = <0x09>;
+			ti,sci-dev-id = <0x8e>;
+			ti,sci-proc-ids = <0x03 0xff>;
+			resets = <0x1a 0x8e 0x01>;
+			firmware-name = "j7-c66_0-fw";
+			mboxes = <0x76 0x77>;
+			memory-region = <0x78 0x79>;
+			phandle = <0x2f1>;
+		};
+
+		dsp@4d81800000 {
+			compatible = "ti,j721e-c66-dsp";
+			reg = <0x4d 0x81800000 0x00 0x48000 0x4d 0x81e00000 0x00 0x8000 0x4d 0x81f00000 0x00 0x8000>;
+			reg-names = "l2sram\0l1pram\0l1dram";
+			ti,sci = <0x09>;
+			ti,sci-dev-id = <0x8f>;
+			ti,sci-proc-ids = <0x04 0xff>;
+			resets = <0x1a 0x8f 0x01>;
+			firmware-name = "j7-c66_1-fw";
+			mboxes = <0x76 0x7a>;
+			memory-region = <0x7b 0x7c>;
+			phandle = <0x2f2>;
+		};
+
+		dsp@64800000 {
+			compatible = "ti,j721e-c71-dsp";
+			reg = <0x00 0x64800000 0x00 0x80000 0x00 0x64e00000 0x00 0xc000>;
+			reg-names = "l2sram\0l1dram";
+			ti,sci = <0x09>;
+			ti,sci-dev-id = <0x0f>;
+			ti,sci-proc-ids = <0x30 0xff>;
+			resets = <0x1a 0x0f 0x01>;
+			firmware-name = "j7-c71_0-fw";
+			mboxes = <0x7d 0x7e>;
+			memory-region = <0x7f 0x80>;
+			phandle = <0x2f3>;
+		};
+...
+		c66-dma-memory@a6000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa6000000 0x00 0x100000>;
+			no-map;
+			phandle = <0x7b>;
+		};
+
+		c66-memory@a6100000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa6100000 0x00 0xf00000>;
+			no-map;
+			phandle = <0x79>;
+		};
+
+		c66-dma-memory@a7000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa7000000 0x00 0x100000>;
+			no-map;
+			phandle = <0x78>;
+		};
+
+		c66-memory@a7100000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa7100000 0x00 0xf00000>;
+			no-map;
+			phandle = <0x7c>;
+		};
+
+		c71-dma-memory@a8000000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa8000000 0x00 0x100000>;
+			no-map;
+			phandle = <0x7f>;
+		};
+
+		c71-memory@a8100000 {
+			compatible = "shared-dma-pool";
+			reg = <0x00 0xa8100000 0x00 0xf00000>;
+			no-map;
+			phandle = <0x80>;
+		};
+...
+		c66_0 = "/bus@100000/dsp@4d80800000";
+		c66_1 = "/bus@100000/dsp@4d81800000";
+...
+		c66_1_dma_memory_region = "/reserved-memory/c66-dma-memory@a6000000";
+		c66_0_memory_region = "/reserved-memory/c66-memory@a6100000";
+		c66_0_dma_memory_region = "/reserved-memory/c66-dma-memory@a7000000";
+		c66_1_memory_region = "/reserved-memory/c66-memory@a7100000";
+		c71_0_dma_memory_region = "/reserved-memory/c71-dma-memory@a8000000";
+		c71_0_memory_region = "/reserved-memory/c71-memory@a8100000";
+```
+
+So in my case, the following table is a summary of information from device tree. Thus we are able to do the same for the c7x as easily (`make debug-dsp14`) by building the [linker map for the c7x](./J721E_DSP14.cmd).
+
+|          | c66_0      |    c66_1   | c77_0 
+|----------|------------|------------|--------
+| Local    | 0xa6100000 | 0xa7100000 | 0xa8100000
+| DMA      | 0xa6000000 | 0xa7000000 | 0xa8000000
+| l2sram   | 0x80800000 | 0x81800000 | 0x64800000
+| l1pram   | 0x80e00000 | 0x81e00000 | 
+| l1dram   | 0x80f00000 | 0x81f00000 | 0x64e00000
