@@ -7,7 +7,7 @@ CFLAGS = --include_path=$(PRU_SWPKG)/include \
          --include_path=$(PRU_SWPKG)/include/j721e
 LDFLAGS = J721E_PRU9.cmd
 
-all: main-pru
+all: $(PRU_FW)
 
 main-pru.o: main-pru.c
 	$(CC) $(CFLAGS) $^ --output_file $@
