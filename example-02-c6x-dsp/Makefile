@@ -9,14 +9,14 @@ PRU_SWPKG = /usr/share/ti/cgt-pru
 DSP_SWPKG = $(CGT_C6X_DIR)
 DSP7_SWPKG = $(CGT_C7X_DIR)
 
-CC = $(CGT_C6X_DIR)/bin/cl6x
-LD = $(CGT_C6X_DIR)/bin/lnk6x
+CC = $(firstword $(wildcard $(CGT_C6X_DIR)/bin/cl6x) /usr/bin/cl6x)
+LD = $(firstword $(wildcard $(CGT_C6X_DIR)/bin/lnk6x) /usr/bin/lnk6x)
 # LD = cl6x -z
 CFLAGS = --include_path=$(DSP_SWPKG)/include --include_path=$(DSP_SWPKG)/lib --include_path=/usr/lib/ti/pru-software-support-package/include
 LDFLAGS = -c --search_path=$(DSP_SWPKG)/lib 
 
-CC7 = $(CGT_C7X_DIR)/bin/cl7x
-LD7 = $(CGT_C7X_DIR)/bin/lnk7x
+CC7 = $(firstword $(wildcard $(CGT_C7X_DIR)/bin/cl7x) /usr/bin/cl7x)
+LD7 = $(firstword $(wildcard $(CGT_C7X_DIR)/bin/lnk7x) /usr/bin/lnk7x)
 C7FLAGS = --include_path=$(DSP7_SWPKG)/include --include_path=$(DSP7_SWPKG)/lib --include_path=/usr/lib/ti/pru-software-support-package/include
 LD7FLAGS = -c --search_path=$(DSP7_SWPKG)/lib 
 
@@ -73,7 +73,7 @@ k3-j721e-beagleboneai64.dts:
 	elif [ -f /boot/dtbs/$(KERNEL_VERSION)/ti/k3-j721e-beagleboneai64.dtb ]; then \
 		dtc -I dtb -O dts /boot/dtbs/$(KERNEL_VERSION)/ti/k3-j721e-beagleboneai64.dtb > $@; \
 	else \
-		echo "Error: BeagleBone AI-64 Device Tree Blob (.dtb) not found" && exit 1; \
+		echo "Warning: BeagleBone AI-64 Device Tree Blob (.dtb) not found. Skipping dts disassembly."; \
 	fi
 
 .PHONY: run-dsp12 debug-dsp12 clean
