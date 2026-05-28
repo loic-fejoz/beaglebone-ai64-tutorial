@@ -1,10 +1,12 @@
 PRU_SWPKG = /usr/lib/ti/pru-software-support-package
+CGT_PRU_DIR ?= /usr/share/ti/cgt-pru
 
-CC = clpru
-LD = lnkpru
-CFLAGS = --include_path=$(PRU_SWPKG)/include \
+CC = $(CGT_PRU_DIR)/bin/clpru
+LD = $(CGT_PRU_DIR)/bin/lnkpru
+CFLAGS = --include_path=$(CGT_PRU_DIR)/include \
+         --include_path=$(PRU_SWPKG)/include \
          --include_path=$(PRU_SWPKG)/include/j721e
-LDFLAGS=J721E_PRU9.cmd
+LDFLAGS = --search_path=$(CGT_PRU_DIR)/lib --library=rtspruv3_le.lib J721E_PRU9.cmd
 
 all: main-pru
 
@@ -18,7 +20,7 @@ main-pru: main-pru.o J721E_PRU9.cmd
 	sudo cp $< $@
 
 run-pru9: /lib/firmware/pru9-fw
-	sudo sh -c "echo 'stop' > /sys/class/remoteproc/remoteproc9/state" && \
+	sudo sh -c "echo 'stop' > /sys/class/remoteproc/remoteproc9/state" ; \
 	sudo sh -c "echo 'pru9-fw' > /sys/class/remoteproc/remoteproc9/firmware" && \
 	sudo sh -c "echo 'start' > /sys/class/remoteproc/remoteproc9/state"
 

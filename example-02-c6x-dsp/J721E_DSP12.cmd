@@ -75,11 +75,11 @@ MEMORY
     /* L2 for C66x_1 [ size 224.00 KB ] */
     L2RAM_C66x_1             ( RWIX ) : ORIGIN = 0x00800000 , LENGTH = 0x00038000
     /* DDR for C66x_1 for Linux resource table [ size 1024 B ] */
-    DDR_C66x_1_RESOURCE_TABLE ( RWIX ) : ORIGIN = 0xA6100000 , LENGTH = 0x00000400
+    DDR_C66x_1_RESOURCE_TABLE ( RWIX ) : ORIGIN = 0xA8100000 , LENGTH = 0x00000400
     /* DDR for C66x_1 for boot section [ size 1024 B ] */
-    DDR_C66x_1_BOOT          ( RWIX ) : ORIGIN = 0xA8200000 , LENGTH = 0x00000400
-    /* DDR for C66x_1 for code/data [ size 14.00 MB ] */
-    DDR_C66x_1               ( RWIX ) : ORIGIN = 0xA6200400 , LENGTH = 0x00DFFC00
+    DDR_C66x_1_BOOT          ( RWIX ) : ORIGIN = 0xA8100400 , LENGTH = 0x00000400
+    /* DDR for C66x_1 for code/data [ size 14.99 MB ] */
+    DDR_C66x_1               ( RWIX ) : ORIGIN = 0xA8100800 , LENGTH = 0x00EFF800
     /* DDR for C66x_1 for Linux IPC [ size 1024.00 KB ] */
     DDR_C66x_1_IPC           ( RWIX ) : ORIGIN = 0xA9000000 , LENGTH = 0x00100000
     /* Memory for IPC Vring's. MUST be non-cached or cache-coherent [ size 32.00 MB ] */
