@@ -74,6 +74,7 @@ MEMORY
     DDR_C7X_1_BOOT           ( RWIX ) : ORIGIN = 0xA8200000 , LENGTH = 0x00000400
     DDR_C7X_1                ( RWIX ) : ORIGIN = 0xA8200400 , LENGTH = 0x00DFFC00
     /*DDR_C7X_1_LOCAL_HEAP     ( RWIX ) : ORIGIN = 0xDC000000 , LENGTH = 0x01000000*/
+    /* Note: Origin 0x64E00000 maps to internal C7x L1 DRAM/SRAM rather than external DDR memory */
     DDR_C7X_1_LOCAL_HEAP     ( RWIX ) : ORIGIN = 0x64E00000 , LENGTH = 0xc000
     DDR_C7X_1_SCRATCH        ( RWIX ) : ORIGIN = 0xDD000000 , LENGTH = 0x03000000
 }

@@ -1,19 +1,23 @@
 C6X_C_DIR="/usr/share/ti/cgt-c6x/include;/usr/share/ti/cgt-c6x/lib"
 DSP_FW=dsp12-hello
+
+CGT_C6X_DIR ?= /usr/share/ti/cgt-c6x
+CGT_C7X_DIR ?= /usr/share/ti/cgt-c7x
+KERNEL_VERSION ?= $(shell uname -r)
+
 PRU_SWPKG = /usr/share/ti/cgt-pru
-DSP_SWPKG = /usr/share/ti/cgt-c6x
+DSP_SWPKG = $(CGT_C6X_DIR)
+DSP7_SWPKG = $(CGT_C7X_DIR)
 
-
-CC = cl6x
-LD = lnk6x
+CC = $(CGT_C6X_DIR)/bin/cl6x
+LD = $(CGT_C6X_DIR)/bin/lnk6x
 # LD = cl6x -z
-CFLAGS = --include_path=$(DSP_SWPKG)/include --include_path=$(DSP_SWPKG)/lib --include_path=/usr/src/linux-headers-$(shell uname -r)/include --include_path=/usr/lib/ti/pru-software-support-package/include
+CFLAGS = --include_path=$(DSP_SWPKG)/include --include_path=$(DSP_SWPKG)/lib --include_path=/usr/lib/ti/pru-software-support-package/include
 LDFLAGS = -c --search_path=$(DSP_SWPKG)/lib 
 
-DSP7_SWPKG = /usr/share/ti/cgt-c7x
-CC7 = cl7x
-LD7 = lnk7x
-C7FLAGS = --include_path=$(DSP7_SWPKG)/include --include_path=$(DSP7_SWPKG)/lib --include_path=/usr/src/linux-headers-$(shell uname -r)/include --include_path=/usr/lib/ti/pru-software-support-package/include
+CC7 = $(CGT_C7X_DIR)/bin/cl7x
+LD7 = $(CGT_C7X_DIR)/bin/lnk7x
+C7FLAGS = --include_path=$(DSP7_SWPKG)/include --include_path=$(DSP7_SWPKG)/lib --include_path=/usr/lib/ti/pru-software-support-package/include
 LD7FLAGS = -c --search_path=$(DSP7_SWPKG)/lib 
 
 all: $(DSP_FW) dsp14-hello J721E_DSP12.svg C66SS.svg k3-j721e-beagleboneai64.dts
@@ -64,7 +68,13 @@ stop-dsp14:
 	mld $<
 
 k3-j721e-beagleboneai64.dts:
-	dtc -I dtb -O dts /boot/dtbs/$(shell uname -r)/ti/k3-j721e-beagleboneai64.dtb > $@
+	@if [ -f /boot/firmware/k3-j721e-beagleboneai64.dtb ]; then \
+		dtc -I dtb -O dts /boot/firmware/k3-j721e-beagleboneai64.dtb > $@; \
+	elif [ -f /boot/dtbs/$(KERNEL_VERSION)/ti/k3-j721e-beagleboneai64.dtb ]; then \
+		dtc -I dtb -O dts /boot/dtbs/$(KERNEL_VERSION)/ti/k3-j721e-beagleboneai64.dtb > $@; \
+	else \
+		echo "Error: BeagleBone AI-64 Device Tree Blob (.dtb) not found" && exit 1; \
+	fi
 
 .PHONY: run-dsp12 debug-dsp12 clean
 

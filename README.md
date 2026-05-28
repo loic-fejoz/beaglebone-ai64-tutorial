@@ -14,7 +14,7 @@ sudo apt install ti-c7000-cgt-v2.1 ti-c6000-cgt-v8.3 ti-pru-cgt-v2.3 ti-pru-soft
 ## Tutorial Steps
 
 0. [simplest PRU software](./example-00-pru)
-1. [Simple Hello Worl with remoteproc trace](./example-01-pru-hello)
+1. [Simple Hello World with remoteproc trace](./example-01-pru-hello)
 2. [Simplest DSP firmware](./example-02-c6x-dsp/)
 
 ## Inspiration

@@ -31,7 +31,7 @@ static const struct my_resource_table dsp_remoteproc_ResourceTable = {
     {
         (TYPE_TRACE),
         (uint32_t)gDebugMemLog, DebugP_MEM_LOG_SIZE,
-        0, "trace:c66x_1",
+        0, "trace:c66x_0",
     },
 };
 
@@ -40,5 +40,4 @@ int main(void) {
     while (1) {
         
     }
-    return 0;
 }

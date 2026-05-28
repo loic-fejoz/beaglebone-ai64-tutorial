@@ -38,8 +38,7 @@ static const struct my_resource_table dsp_remoteproc_ResourceTable = {
 
 int main(void) {
     strcpy(gDebugMemLog, "Hello world, I am c7_0!\n");
-    /*while (1) {
+    while (1) {
         
-    }*/
-    return 0;
+    }
 }

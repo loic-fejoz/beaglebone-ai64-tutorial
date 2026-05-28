@@ -1,8 +1,9 @@
 PRU_FW=pru9-hellobis
 PRU_SWPKG = /usr/lib/ti/pru-software-support-package
+CGT_PRU_DIR ?= /usr/share/ti/cgt-pru
 
-CC = clpru
-LD = lnkpru
+CC = $(CGT_PRU_DIR)/bin/clpru
+LD = $(CGT_PRU_DIR)/bin/lnkpru
 CFLAGS = --include_path=$(PRU_SWPKG)/include \
          --include_path=$(PRU_SWPKG)/include/j721e
 LDFLAGS = J721E_PRU9.cmd
