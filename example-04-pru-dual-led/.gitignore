@@ -1,0 +1,4 @@
+*.o
+*.obj
+*.dtbo
+pru8-dual-led-fw
