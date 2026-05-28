@@ -1,0 +1,10 @@
+# Compiled firmware binaries
+pru8-led-fw
+pru9-led-fw
+
+# Device Tree Overlay binary
+*.dtbo
+
+# Object files
+*.o
+*.obj

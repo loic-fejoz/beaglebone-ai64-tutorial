@@ -47,6 +47,8 @@ This method containerizes the exact same compiler toolchain so you can build the
 0. [simplest PRU software](./example-00-pru)
 1. [Simple Hello World with remoteproc trace](./example-01-pru-hello)
 2. [Simplest DSP firmware](./example-02-c6x-dsp/)
+3. [Blinking LED (PRU)](./example-03-pru-led/)
+
 
 ## Inspiration
 

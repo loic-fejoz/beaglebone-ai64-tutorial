@@ -1,0 +1,15 @@
+/dts-v1/;
+/plugin/;
+
+&bone_led_P8_11 {
+    status = "disabled";
+};
+
+&bone_key_P8_11 {
+    status = "disabled";
+};
+
+&pru0_0 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&P8_11_pruout_pin>;
+};
