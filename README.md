@@ -58,4 +58,5 @@ This method containerizes the exact same compiler toolchain so you can build the
 * https://github.com/RoSchmi/Beaglebone-PRU-RPMsg-HelloWorld
 * https://solidmodeling.calliope.us/index.php/2016/09/11/beaglebone-remoteproc-hello-world/
 * https://github.com/PierrickRauby/PRU-RPMsg-Setup-BeagleBoneBlack/blob/master/PRU%20Rpmsg%20documentation.pdf
+* https://github.com/kevinacahalan/BeagleBoneAI64_Heterogeneous_App_Example
 

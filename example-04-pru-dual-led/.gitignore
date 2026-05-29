@@ -2,3 +2,5 @@
 *.obj
 *.dtbo
 pru8-dual-led-fw
+pru0-dual-core-fw
+pru1-dual-core-fw
