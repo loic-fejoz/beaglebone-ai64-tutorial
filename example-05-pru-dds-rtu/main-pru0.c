@@ -43,11 +43,6 @@ void main(void) {
         /* Read delay cycles dynamically from Shared RAM */
         delay_cycles = *shared_frequency;
         
-        /* Clamp delay to avoid zero/negative loop errors */
-        if (delay_cycles < 2) {
-            delay_cycles = 2;
-        }
-
         /*
          * Write 4-bit count to bits 16-19 of __R30 branchlessly.
          * Bit mappings:
