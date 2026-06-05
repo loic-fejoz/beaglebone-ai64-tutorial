@@ -1,0 +1,5 @@
+pru0-epwm-fw
+rtu0-rpmsg-fw
+*.dtbo
+*.o
+*.obj

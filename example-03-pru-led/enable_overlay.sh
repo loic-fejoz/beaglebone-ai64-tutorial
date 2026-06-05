@@ -52,8 +52,13 @@ for line in lines:
         found_label = True
     elif found_label and stripped.startswith(\"fdtoverlays\"):
         parts = stripped.split()
-        if overlay_path not in parts:
-            line = line.rstrip() + \" \" + overlay_path + \"\\n\"
+        new_parts = [parts[0]]
+        for p in parts[1:]:
+            if \"bbai64-pru-\" not in p:
+                new_parts.append(p)
+        if overlay_path not in new_parts:
+            new_parts.append(overlay_path)
+        line = \"    \" + \" \".join(new_parts) + \"\\n\"
         added = True
     elif found_label and stripped.startswith(\"label \"):
         if not added:

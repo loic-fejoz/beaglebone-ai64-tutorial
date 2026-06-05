@@ -301,3 +301,36 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
 * **Avoid `sprintf` / `atoi` / `sscanf`**: Calling standard library parsing and formatting functions imports extensive helper code from `rtspruv3_le.lib`, inflating the firmware binary size and consuming massive stack space, which can easily overflow the 2 KB DMEM stack limit.
 * **The Alternative**: Write custom, lightweight ASCII-to-integer parsers and integer-to-string formatters directly in your source code.
 
+### E. Accessing Main Domain Peripherals (EHRPWM, etc.) from PRU
+* **RemoteProc IOMMU Constraint**: On AM65x/TDA4VM, the PRU subsystem does not have an IOMMU. Attempting to define mappings in the resource table using `TYPE_DEVMEM` will fail during firmware loading, emitting kernel error: `remoteproc remoteproc0: Failed to process resources: -22`.
+* **Manual RAT Configuration**: Instead of resource table entries, program the hardware RAT (Region Address Translator) registers directly from the PRU C code. The RAT registers are located at local address `0x00008000` (mapped to Constant Register 22 in `J721E_PRU0.cmd`). We must configure them using the C compiler's `cregister` table features to generate `SBCO` instructions (as a standard memory pointer `SBBO` access to local address `0x8000` is not mapped by the PRU core's memory interface). The regions begin at offset `0x20` inside the RAT register slice. For example, to map local `0x60000000` to system physical `0x03000000` (1 MB):
+  ```c
+  typedef struct {
+      volatile uint32_t CTRL;
+      volatile uint32_t BASE;
+      volatile uint32_t TRANS_L;
+      volatile uint32_t TRANS_H;
+  } rat_region;
+
+  typedef struct {
+      volatile uint32_t PID;
+      volatile uint32_t CONFIG;
+      uint32_t rsvd8[6]; /* Offset 0x08 to 0x1f */
+      volatile rat_region REGION[16];
+  } my_rat;
+
+  volatile __far my_rat CT_RAT __attribute__ ((cregister("PRU_RTU_RAT0", far), peripheral));
+
+  /* Map region 1 */
+  CT_RAT.REGION[1].BASE = 0x60000000;
+  CT_RAT.REGION[1].TRANS_L = 0x03000000;
+  CT_RAT.REGION[1].TRANS_H = 0;
+  CT_RAT.REGION[1].CTRL = (1U << 31) | 19; /* Enable, 1 MB size */
+  ```
+* **Peripheral Clock Gating Aborts**: System peripherals (like EHRPWM) are clock-gated by default. If the PRU attempts to write to a gated register range, it triggers a bus abort exception that freezes the PRU core. To avoid this, set the peripheral's device tree status to `okay` (which binds it to the Linux driver), and export/enable at least one channel in Linux user-space (e.g. via sysfs `pwmchip`) before starting the PRU core to force the System Co-processor to keep the clock active.
+
+### F. U-Boot Overlay Accumulation Pitfall
+* **The Problem**: Appending multiple device tree overlays to the `fdtoverlays` line in `extlinux.conf` over time can cause pinmux and remoteproc conflicts, leading to boot failures where the board responds to ping but SSH and USB (keyboard) are disabled because the system fails during driver probing.
+* **The Solution**: Ensure your overlay enablement scripts clean up any previously registered overlays of the same tutorial/category before adding the new one.
+
+

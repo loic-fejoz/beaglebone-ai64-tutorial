@@ -4,7 +4,7 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 SSH_TARGET="${1:-debian@192.168.1.151}"
 SUDO_PASS="${SUDO_PASS:-temppwd}"
-DTBO_NAME="bbai64-pru-dds.dtbo"
+DTBO_NAME="bbai64-pru-epwm.dtbo"
 DTBO_PATH="$DIR/$DTBO_NAME"
 
 if [ ! -f "$DTBO_PATH" ]; then
