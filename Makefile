@@ -1,4 +1,5 @@
-EXAMPLES = example-00-pru example-01-pru-hello example-02-c6x-dsp example-03-pru-led example-04-pru-dual-led
+EXAMPLES = example-00-pru example-01-pru-hello example-02-c6x-dsp example-03-pru-led example-04-pru-dual-led example-05-pru-dds-rtu
+
 
 .PHONY: all clean $(EXAMPLES)
 

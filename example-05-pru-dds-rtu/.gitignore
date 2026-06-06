@@ -1,0 +1,6 @@
+*.o
+*.obj
+*.dtbo
+pru8-dual-led-fw
+pru0-dds-fw
+rtu0-rpmsg-fw
