@@ -28,4 +28,7 @@ debug-pru9: run-pru9
 	dmesg | tail -n 10
 	sudo tail /sys/kernel/debug/remoteproc/remoteproc9/trace0
 
-.PHONY: run-pru9 debug-pru9
+clean:
+	rm -f main-pru *.o *.obj
+
+.PHONY: run-pru9 debug-pru9 clean

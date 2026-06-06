@@ -49,6 +49,8 @@ This method containerizes the exact same compiler toolchain so you can build the
 2. [Simplest DSP firmware](./example-02-c6x-dsp/)
 3. [Blinking LED (PRU)](./example-03-pru-led/)
 4. [Dual Blinking LEDs (PRU Simultaneous Toggling)](./example-04-pru-dual-led/)
+5. [Direct Digital Synthesis & RPMsg (PRU + RTU)](./example-05-pru-dds-rtu/)
+6. [Hardware-Accelerated Blinking via EPWM (Enhanced PWM)](./example-06-pru-epwm/)
 
 
 ## Inspiration
