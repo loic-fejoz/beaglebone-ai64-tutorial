@@ -341,4 +341,49 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
 * **The Problem**: Appending multiple device tree overlays to the `fdtoverlays` line in `extlinux.conf` over time can cause pinmux and remoteproc conflicts, leading to boot failures where the board responds to ping but SSH and USB (keyboard) are disabled because the system fails during driver probing.
 * **The Solution**: Ensure your overlay enablement scripts clean up any previously registered overlays of the same tutorial/category before adding the new one.
 
+### G. C66x DSP Cache Coherency (Shared RAM communications)
+* **The Problem**: The C66x DSP has internal L1D and L2 caches enabled by default. If the DSP reads data from Shared RAM that was written by the PRU, the data may be cached, leading the DSP to read stale values even if the PRU updates Shared RAM.
+* **The Solution**: 
+  1. **Disable Caching**: Use the DSP Memory Attribute Registers (MAR) to disable caching for the virtual memory range mapped by the RAT. For RAT mapping virtual address region `0x30000000` to `0x30FFFFFF` (16 MB), program `MAR48` (located at physical register address `0x018480C4`) to `0`:
+     ```c
+     volatile uint32_t *dsp_mar48 = (volatile uint32_t *)0x018480C4;
+     *dsp_mar48 = 0; // Disable cache for 0x30000000 - 0x30FFFFFF range
+     ```
+  2. **Global Cache Invalidation**: Perform a global L1D and L2 cache invalidation once at startup to clear any lines that were pre-fetched before caching was disabled. Access the cache control registers `L2INV` (at `0x01845008`) and `L1DINV` (at `0x01845048`) to invalidate caches:
+     ```c
+     /* Global L2 Invalidate */
+     *(volatile uint32_t *)0x01845008 = 1;
+     while (*(volatile uint32_t *)0x01845008 & 1) { __asm(" NOP"); }
+
+     /* Global L1D Invalidate */
+     *(volatile uint32_t *)0x01845048 = 1;
+     while (*(volatile uint32_t *)0x01845048 & 1) { __asm(" NOP"); }
+     ```
+
+### H. remoteproc debugfs trace0 File Tail Behavior
+* **The Problem**: The virtual trace log file `/sys/kernel/debug/remoteproc/remoteprocX/traceY` represents a ring buffer in the DSP's memory. The Linux virtual file system reports its file size statically as 16384 bytes and does not trigger standard `inotify` file-modification events. As a result, running `tail -f` without flags will never update dynamically when the DSP prints logs.
+* **The Solution**: Use a polling watch command, descriptor-based tracking, or a python script reading the file:
+  - **Watch command**: `watch -n 1 cat /sys/kernel/debug/remoteproc/remoteproc12/trace0`
+  - **Tail polling**: `tail ---disable-inotify -f /sys/kernel/debug/remoteproc/remoteproc12/trace0`
+  - **Python script**: Open the trace file, read it, parse the last block (e.g. searching for a string like `--- Live Spectrum`), and print the result.
+
+### I. PRU High-Speed Sampling Loop Cycle Alignment
+* **The Problem**: On the BeagleBone AI-64, the ICSSG PRU cores are clocked at **250 MHz** (not 200 MHz as often assumed). A 10-cycle loop executes in exactly 40 ns, which equates to a sampling rate of **25 MSPS** (25 MHz). Under compiler optimization `-O3`, the C compiler's generated code can introduce variable instruction ordering and register loads inside the loop body (such as loading global variable addresses/pointers from DMEM via `LBBO`), leading to jitter or non-deterministic cycle lengths.
+* **The Solution**: Replace the critical sampling loop block with a deterministic, hand-written inline assembly block that uses registers directly and avoids memory reads. Adding padding `NOP` instructions guarantees a precise cycle count (e.g. exactly 10 cycles for 25 MSPS):
+  ```c
+  /* Inline assembly sampling loop to ensure exactly 10 cycles per iteration (25 MSPS) */
+  __asm("    LDI32   r2, 0x10008\n"       /* r2 = sample_buffer address */
+        "    LDI     r3, 1024\n"          /* r3 = loop counter (NUM_SAMPLES) */
+        "sample_loop:\n"
+        "    AND     r4, r31, 0x10\n"     /* Read P8_41 and mask */
+        "    SBBO    &r4, r2, 0, 1\n"     /* Store 1 byte to Shared RAM */
+        "    ADD     r2, r2, 1\n"         /* Increment address pointer */
+        "    NOP\n"
+        "    NOP\n"
+        "    NOP\n"
+        "    NOP\n"
+        "    SUB     r3, r3, 1\n"         /* Decrement loop counter */
+        "    QBNE    sample_loop, r3, 0\n");
+  ```
+
 
