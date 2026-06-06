@@ -271,6 +271,7 @@ To prevent timing jitter and cycle variations in high-speed protocols (e.g. Pola
 When building complex cooperative real-time applications involving multiple cores (PRU and RTU) and dynamic host interface systems (RPMsg), pay attention to the following architecture-specific details:
 
 ### A. RTU-Specific Register and Event Routing
+
 * **Interrupt-to-Bit Mapping**: For RTU (and TX_PRU) cores, host interrupts 10-19 map to **bits 30-39 of register `__R31`** (whereas standard PRU cores map host interrupts 0 and 1 to bits 30 and 31). If you are listening for kicks on RTU0 using Host-10, check bit 30:
   ```c
   #define HOST_INT ((uint32_t) 1 << 30) // Host-10 on RTU
@@ -279,6 +280,7 @@ When building complex cooperative real-time applications involving multiple core
 * **System Event Assignments**: In the TI kernel, RTU0 uses system event 20 (`TO_ARM_HOST`) and event 21 (`FROM_ARM_HOST`) for VirtIO vring mailboxes.
 
 ### B. Linker Script Segment Failures (`(COPY)` Section)
+
 The RemoteProc driver parses the `.pru_irq_map` section from the ELF file header to configure the interrupt controller (INTC), but it must **not** attempt to load this mapping table into the PRU's physical data memory.
 * **The Failure**: If defined as a loadable segment in the linker script, RemoteProc will fail to boot the core, emitting kernel errors:
   `remoteproc remoteproc1: PRU memory copy failed for da 0xXXXX memsz 0xYY`
@@ -292,16 +294,19 @@ The RemoteProc driver parses the `.pru_irq_map` section from the ELF file header
   ```
 
 ### C. C89/C90 Language Standards Constraint
+
 The TI `clpru` compiler enforces C89 constraints by default. Programmers accustomed to modern C/C++ standards must adjust:
 * **Scope Declarations**: You cannot declare variables inline inside loops (e.g. `for(int i = 0; ...)`) or midway through blocks. **All variables must be declared at the beginning of the block scope**.
 * **GCC Inline Assembly Constraint Limitations**: GCC-style inline assembly operand constraints (like `: "=r"(val)`) are **not** supported by `clpru`. Use only simple single-string `__asm("...")` blocks.
 
 ### D. Memory Size Constraints (Avoiding libc calls)
+
 Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per slice partition).
 * **Avoid `sprintf` / `atoi` / `sscanf`**: Calling standard library parsing and formatting functions imports extensive helper code from `rtspruv3_le.lib`, inflating the firmware binary size and consuming massive stack space, which can easily overflow the 2 KB DMEM stack limit.
 * **The Alternative**: Write custom, lightweight ASCII-to-integer parsers and integer-to-string formatters directly in your source code.
 
 ### E. Accessing Main Domain Peripherals (EHRPWM, etc.) from PRU
+
 * **RemoteProc IOMMU Constraint**: On AM65x/TDA4VM, the PRU subsystem does not have an IOMMU. Attempting to define mappings in the resource table using `TYPE_DEVMEM` will fail during firmware loading, emitting kernel error: `remoteproc remoteproc0: Failed to process resources: -22`.
 * **Manual RAT Configuration**: Instead of resource table entries, program the hardware RAT (Region Address Translator) registers directly from the PRU C code. The RAT registers are located at local address `0x00008000` (mapped to Constant Register 22 in `J721E_PRU0.cmd`). We must configure them using the C compiler's `cregister` table features to generate `SBCO` instructions (as a standard memory pointer `SBBO` access to local address `0x8000` is not mapped by the PRU core's memory interface). The regions begin at offset `0x20` inside the RAT register slice. For example, to map local `0x60000000` to system physical `0x03000000` (1 MB):
   ```c
@@ -338,10 +343,12 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
     The maximum achievable frequency at a 50% duty cycle with `TBPRD = 1` is $\frac{125\text{ MHz}}{2} = 62.5\text{ MHz}$.
 
 ### F. U-Boot Overlay Accumulation Pitfall
+
 * **The Problem**: Appending multiple device tree overlays to the `fdtoverlays` line in `extlinux.conf` over time can cause pinmux and remoteproc conflicts, leading to boot failures where the board responds to ping but SSH and USB (keyboard) are disabled because the system fails during driver probing.
 * **The Solution**: Ensure your overlay enablement scripts clean up any previously registered overlays of the same tutorial/category before adding the new one.
 
 ### G. C66x DSP Cache Coherency (Shared RAM communications)
+
 * **The Problem**: The C66x DSP has internal L1D and L2 caches enabled by default. If the DSP reads data from Shared RAM that was written by the PRU, the data may be cached, leading the DSP to read stale values even if the PRU updates Shared RAM.
 * **The Solution**: 
   1. **Disable Caching**: Use the DSP Memory Attribute Registers (MAR) to disable caching for the virtual memory range mapped by the RAT. For RAT mapping virtual address region `0x30000000` to `0x30FFFFFF` (16 MB), program `MAR48` (located at physical register address `0x018480C4`) to `0`:
@@ -361,6 +368,7 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
      ```
 
 ### H. remoteproc debugfs trace0 File Tail Behavior
+
 * **The Problem**: The virtual trace log file `/sys/kernel/debug/remoteproc/remoteprocX/traceY` represents a ring buffer in the DSP's memory. The Linux virtual file system reports its file size statically as 16384 bytes and does not trigger standard `inotify` file-modification events. As a result, running `tail -f` without flags will never update dynamically when the DSP prints logs.
 * **The Solution**: Use a polling watch command, descriptor-based tracking, or a python script reading the file:
   - **Watch command**: `watch -n 1 cat /sys/kernel/debug/remoteproc/remoteproc12/trace0`
@@ -368,6 +376,7 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
   - **Python script**: Open the trace file, read it, parse the last block (e.g. searching for a string like `--- Live Spectrum`), and print the result.
 
 ### I. PRU High-Speed Sampling Loop Cycle Alignment
+
 * **The Problem**: On the BeagleBone AI-64, the ICSSG PRU cores are clocked at **250 MHz** (not 200 MHz as often assumed). A 10-cycle loop executes in exactly 40 ns, which equates to a sampling rate of **25 MSPS** (25 MHz). Under compiler optimization `-O3`, the C compiler's generated code can introduce variable instruction ordering and register loads inside the loop body (such as loading global variable addresses/pointers from DMEM via `LBBO`), leading to jitter or non-deterministic cycle lengths.
 * **The Solution**: Replace the critical sampling loop block with a deterministic, hand-written inline assembly block that uses registers directly and avoids memory reads. Adding padding `NOP` instructions guarantees a precise cycle count (e.g. exactly 10 cycles for 25 MSPS):
   ```c
@@ -386,4 +395,6 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
         "    QBNE    sample_loop, r3, 0\n");
   ```
 
+* **The Problem**: Appending multiple device tree overlays to the `fdtoverlays` line in `extlinux.conf` over time can cause pinmux and remoteproc conflicts, leading to boot failures where the board responds to ping but SSH and USB (keyboard) are disabled because the system fails during driver probing.
+* **The Solution**: Ensure your overlay enablement scripts clean up any previously registered overlays of the same tutorial/category before adding the new one.
 

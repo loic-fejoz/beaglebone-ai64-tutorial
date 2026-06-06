@@ -53,7 +53,6 @@ This method containerizes the exact same compiler toolchain so you can build the
 6. [Hardware-Accelerated Blinking via EPWM (Enhanced PWM)](./example-06-pru-epwm/)
 7. [Cooperative Spectrum Analyzer (Linux + PRU + RTU + DSP)](./example-07-pru-dsp-fft/)
 
-
 ## Inspiration
 
 * https://www.glennklockwood.com/embedded/
