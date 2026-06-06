@@ -2,7 +2,7 @@
 
 This example demonstrates how to control the BeagleBone AI-64's dedicated **Enhanced High-Resolution Pulse Width Modulation (EHRPWM)** hardware module from the PRU cores. 
 
-By leveraging the hardware PWM controller, we can offload the PRU0 CPU from manually bit-banging pins (which consumes 100% CPU and is timing-sensitive). Instead, the PRU0 core dynamically configures the hardware PWM registers to output stable frequencies ranging from **0.85 Hz to 50 MHz** with 50% duty cycle, while the RTU0 core manages the host-to-coprocessor RPMsg interface.
+By leveraging the hardware PWM controller, we can offload the PRU0 CPU from manually bit-banging pins (which consumes 100% CPU and is timing-sensitive). Instead, the PRU0 core dynamically configures the hardware PWM registers. On the TI TDA4VM SoC, the EHRPWM0 module's functional clock (`fck`, device ID 83 in the device tree `arch/arm64/boot/dts/ti/k3-j721e-main.dtsi`) is configured to run at **125 MHz** by default. With this base clock, the PRU0 core can output stable frequencies ranging from **1.06 Hz to 62.5 MHz** with a 50% duty cycle, while the RTU0 core manages the host-to-coprocessor RPMsg interface.
 
 ---
 
@@ -76,12 +76,12 @@ We map `P8_13` to Mode 6 (`EHRPWM0_B`). Thus, we utilize channel B registers.
   - Frequency `> 0 Hz` (On): Set `AQCSFRC = 0x0000` (disables force, allowing PWM output).
 
 ### Dynamic Frequency Scaling (Divisor Search)
-The Time-Base Clock (TBCLK) runs at $100\text{ MHz}$. The 16-bit Period Register `TBPRD` has a maximum limit of $65535$. For lower frequencies, the clock divider must be increased.
+The Time-Base Clock (TBCLK) runs at **$125\text{ MHz}$** by default (derived from the SoC's peripheral PLL clock tree, referenced as `clk:83:0` in Linux's `/sys/kernel/debug/clk/clk_summary`). The 16-bit Period Register `TBPRD` has a maximum limit of $65535$. For lower frequencies, the clock divider must be increased.
 We use a nested search algorithm in PRU C code to find the smallest clock division factor ($D = \text{CLKDIV} \times \text{HSPCLKDIV}$) that allows the period to fit in 16 bits:
 
 $$\text{divisor} = f_{target} \times D$$
 
-$$\text{TBPRD} = \frac{100,000,000}{\text{divisor}} - 1$$
+$$\text{TBPRD} = \frac{125,000,000}{\text{divisor}} - 1$$
 
 To prevent integer overflows during calculation, we skip evaluations where $f_{target} > \frac{2^{32}-1}{D}$.
 Once found, we update `TBPRD`, set `CMPB = (TBPRD + 1) / 2` (for 50% duty cycle), and write the new dividers to `TBCTL`.
@@ -114,9 +114,26 @@ Execute the deployment script to load RTU0 (RPMsg control) and PRU0 (EPWM config
 This script will output `SUCCESS: /dev/rpmsg_pru30 is available` and verify `Pin P8_13 (11c168) is set to Mode 6, pwm`.
 
 ### 4. Run the Frequency Sweeper
+
 Copy and execute the Python control script on the board:
 ```bash
 scp example-06-pru-epwm/host_control.py debian@192.168.1.151:/tmp/
+```
+
+By default, running the script sweeps through a range of frequencies (0 Hz to 50 MHz):
+```bash
 ssh -t debian@192.168.1.151 "sudo python3 /tmp/host_control.py"
 ```
-The script will perform a sweep from `0 Hz` (off) up to `50 MHz` and back down. If an LED is connected to `P8_13` (via a suitable resistor), you will see it flash at low frequencies (1–20 Hz), and glow continuously at higher frequencies. On an oscilloscope, you will see a clean, hardware-generated square wave scaling dynamically through the entire frequency range.
+
+You can also specify a fixed target frequency in Hz using the `--freq` (or `-f`) option. Set `--freq 0` to turn the PWM off and exit:
+```bash
+ssh -t debian@192.168.1.151 "sudo python3 /tmp/host_control.py --freq 10"
+```
+
+To run a fixed frequency for a specific duration in seconds and then stop the PWM, add the `--duration` (or `-d`) option:
+```bash
+ssh -t debian@192.168.1.151 "sudo python3 /tmp/host_control.py --freq 1000 --duration 5"
+```
+
+If an LED is connected to `P8_13` (via a suitable resistor), you will see it flash at low frequencies (1–20 Hz), and glow continuously at higher frequencies. On an oscilloscope, you will see a clean, hardware-generated square wave scaling dynamically through the entire frequency range.
+The program automatically cleans up and forces the PWM output low when terminating or upon receiving system signals (like SIGINT/Ctrl+C or SIGTERM).

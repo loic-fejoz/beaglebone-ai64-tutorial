@@ -328,6 +328,14 @@ Each PRU/RTU data memory region is extremely small (typically 2 KB to 4 KB per s
   CT_RAT.REGION[1].CTRL = (1U << 31) | 19; /* Enable, 1 MB size */
   ```
 * **Peripheral Clock Gating Aborts**: System peripherals (like EHRPWM) are clock-gated by default. If the PRU attempts to write to a gated register range, it triggers a bus abort exception that freezes the PRU core. To avoid this, set the peripheral's device tree status to `okay` (which binds it to the Linux driver), and export/enable at least one channel in Linux user-space (e.g. via sysfs `pwmchip`) before starting the PRU core to force the System Co-processor to keep the clock active.
+* **EHRPWM Clocking & Time-Base (TBCLK) Frequency**:
+  - The EHRPWM modules on the TDA4VM SoC have their functional clock (`fck`) provided by the K3 clock controller (device ID `83` for `EHRPWM0` as defined in `arch/arm64/boot/dts/ti/k3-j721e-main.dtsi`).
+  - By default, the system controller sets this clock rate to **125 MHz** (not 100 MHz as often assumed in generic TI eHRPWM documentation).
+  - This actual clock rate can be verified under Linux at `/sys/kernel/debug/clk/clk_summary` by inspecting the entry for `clk:83:0` (which corresponds to `k3_clks 83 0` in the device tree).
+  - When writing custom PRU/RTU firmware to directly configure the eHRPWM registers, you must use `125000000` (125 MHz) as the base frequency to compute the `TBPRD` period register values correctly:
+    $$\text{TBPRD} = \frac{125,000,000}{f_{\text{target}} \times \text{divider}} - 1$$
+    Using 100 MHz in calculations will result in all output frequencies being scaled up by a factor of 1.25x (e.g., requesting 10 MHz will yield a physical output of 12.5 MHz).
+    The maximum achievable frequency at a 50% duty cycle with `TBPRD = 1` is $\frac{125\text{ MHz}}{2} = 62.5\text{ MHz}$.
 
 ### F. U-Boot Overlay Accumulation Pitfall
 * **The Problem**: Appending multiple device tree overlays to the `fdtoverlays` line in `extlinux.conf` over time can cause pinmux and remoteproc conflicts, leading to boot failures where the board responds to ping but SSH and USB (keyboard) are disabled because the system fails during driver probing.

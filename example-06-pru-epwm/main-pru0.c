@@ -100,8 +100,8 @@ void main(void) {
     epwm->CMPCTL = 0x0000;    /* Shadow mode active, loaded on TBCNT=0 */
     epwm->AQCTLB = 0x0102;    /* ZRO = Set HIGH, CBU = Clear LOW (for EPWM0_B) */
     epwm->TBCNT = 0;          /* Initialize counter */
-    epwm->TBPRD = 9999;       /* Default 10 kHz (with 100 MHz clock) */
-    epwm->CMPB = 5000;        /* 50% duty cycle */
+    epwm->TBPRD = 12499;      /* Default 10 kHz (with 125 MHz clock) */
+    epwm->CMPB = 6250;        /* 50% duty cycle */
     epwm->AQCSFRC = 0x0004;   /* Start with software force LOW (disabled) */
     epwm->TBCTL = (0x3 << 14) | (0x3 << 4) | 0x0; /* Free run, SYNCOSEL=disabled, Up-count */
 
@@ -121,9 +121,9 @@ void main(void) {
                 /* Disable software force (normal PWM enabled) */
                 epwm->AQCSFRC = 0x0000;
 
-                /* Cap frequency at 50 MHz (since input clock is 100 MHz) */
-                if (freq > 50000000) {
-                    freq = 50000000;
+                /* Cap frequency at 62.5 MHz (since input clock is 125 MHz) */
+                if (freq > 62500000) {
+                    freq = 62500000;
                 }
 
                 /* Find the optimal clock division factor (CLKDIV * HSPCLKDIV)
@@ -146,7 +146,7 @@ void main(void) {
                         if (freq > 4294967295 / total_div) continue;
 
                         uint32_t divisor = freq * total_div;
-                        uint32_t prd = 100000000 / divisor;
+                        uint32_t prd = 125000000 / divisor;
 
                         if (prd <= 65536) {
                             if (total_div < best_div) {
