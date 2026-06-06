@@ -1,0 +1,9 @@
+pru0-epwm-fw
+rtu0-rpmsg-fw
+pru1-sampler-fw
+dsp12-fft
+bbai64-pru-dsp-fft.dtbo
+*.o
+*.obj
+*.asm
+__pycache__/
