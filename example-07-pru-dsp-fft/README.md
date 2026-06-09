@@ -8,6 +8,8 @@ This advanced example demonstrates the full heterogeneous potential of the TI TD
 4. **PRU1 (ICSSG0 PRU1)**: Acts as the **High-Speed Sampler**, reading digital input pin `P8_41` at exactly **25 MSPS** (25 MHz) and streaming sample frames into Shared RAM.
 5. **DSP1 (C66x_1 DSP)**: Reads the raw samples from Shared RAM, converts them to floats, computes a **1024-point Cooley-Tukey FFT**, and formats the spectrum into the RemoteProc trace log buffer.
 
+[![asciicast](https://asciinema.org/a/rSSJejqgfB7CcVS6.svg)](https://asciinema.org/a/rSSJejqgfB7CcVS6)
+
 ---
 
 ## 1. System Architecture & Memory Map
