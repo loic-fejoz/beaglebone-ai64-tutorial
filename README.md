@@ -51,7 +51,7 @@ This method containerizes the exact same compiler toolchain so you can build the
 4. [Dual Blinking LEDs (PRU Simultaneous Toggling)](./example-04-pru-dual-led/)
 5. [Direct Digital Synthesis & RPMsg (PRU + RTU)](./example-05-pru-dds-rtu/)
 6. [Hardware-Accelerated Blinking via EPWM (Enhanced PWM)](./example-06-pru-epwm/)
-
+7. [Cooperative Spectrum Analyzer (Linux + PRU + RTU + DSP)](./example-07-pru-dsp-fft/)
 
 ## Inspiration
 

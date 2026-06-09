@@ -45,9 +45,6 @@ CT_RAT.REGION[1].CTRL = (1U << 31) | 19; /* Enable, 1 MB size */
 
 NB: Documentation from Zephyr was really usefull here. See https://github.com/zephyrproject-rtos/zephyr/blob/main/drivers/mm/mm_drv_ti_rat.c and https://github.com/zephyrproject-rtos/zephyr/blob/main/include/zephyr/drivers/mm/rat.h
 
-
----
-
 ## 2. Critical Pitfall: K3 Clock Gating & Bus Faults
 
 On the AM65x and TDA4VM SoCs, peripherals are aggressively clock-gated by the System Controller (DMSC/TIFS) to save power. 

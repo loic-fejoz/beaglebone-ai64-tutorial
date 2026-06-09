@@ -1,0 +1,19 @@
+/dts-v1/;
+/plugin/;
+
+/* Disable default kernel-level device mappings to free P8_13 and P8_19 */
+&bone_led_P8_13 { status = "disabled"; };
+&bone_key_P8_13 { status = "disabled"; };
+&bone_led_P8_19 { status = "disabled"; };
+&bone_key_P8_19 { status = "disabled"; };
+
+/* Enable EHRPWM0 for signal generation */
+&main_ehrpwm0 {
+    status = "okay";
+};
+
+/* Route P8_41 as PRU Input for ICSSG0 PRU1 (pru0_1) */
+&pru0_1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&P8_41_pruin_pin>;
+};
